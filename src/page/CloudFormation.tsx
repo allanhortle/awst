@@ -19,14 +19,24 @@ export default function CloudFormation() {
             <Box marginBottom={1}>
                 <Text bold>Cloud Formation Stacks</Text>
             </Box>
-            {sortBy(stacks.data ?? [], (x) => x.StackName)
-                .slice(0, 10)
-                .map(({RootId, StackName, StackStatus}, index) => (
-                    <Box key={index}>
+            {sortBy(stacks.data ?? [], (x) => x.StackName).map(
+                ({RootId, StackName, StackStatus}, index) => (
+                    <Box justifyContent="space-between" key={index}>
                         <Text>{StackName}</Text>
-                        <Text>{StackStatus}</Text>
+                        <Text
+                            color={
+                                StackStatus?.includes('COMPLETE')
+                                    ? 'green'
+                                    : StackStatus?.includes('FAILED')
+                                    ? 'red'
+                                    : undefined
+                            }
+                        >
+                            {StackStatus}
+                        </Text>
                     </Box>
-                ))}
+                )
+            )}
         </Box>
     );
 }
