@@ -1,0 +1,30 @@
+{
+    "name": "awst",
+    "version": "0.0.0",
+    "main": "index.js",
+    "repository": "git@github.com:allanhortle/awst.git",
+    "author": "Allan Hortle <allanhortle@gmail.com>",
+    "license": "MIT",
+    "bin": "bin/index.js",
+    "type": "module",
+    "scripts": {
+        "watch": "yarn tsc --watch"
+    },
+    "dependencies": {
+        "@aws-sdk/client-cloudformation": "^3.431.0",
+        "@types/lodash-es": "^4.17.10",
+        "commander": "^11.1.0",
+        "ink": "^4.4.1",
+        "lodash-es": "^4.17.21",
+        "react": "^18.2.0",
+        "react-enty": "^3.0.0-alpha.3",
+        "typescript": "^5.2.2",
+        "winston": "^3.11.0"
+    },
+    "devDependencies": {
+        "@types/ink": "^2.0.3",
+        "@types/node": "^20.8.7",
+        "@types/react": "^18.2.29",
+        "prettier": "^3.0.3"
+    }
+}
