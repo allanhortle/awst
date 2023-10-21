@@ -24,16 +24,34 @@ export default function CloudFormation() {
                     schema={[
                         {
                             heading: 'Stack',
-                            render: (row) => <Text>{row.StackName}</Text>
+                            value: (row) => row.StackName,
+                            render: (row) => <Text wrap="truncate">{row.StackName}</Text>
                         },
                         {
                             heading: 'Status',
-                            width: 16,
-                            render: (row) => <Text>{row.StackStatus} </Text>
+                            width: 24,
+                            value: (row) => row.StackStatus,
+                            render: (row) => {
+                                const status = row.StackStatus ?? '';
+                                return (
+                                    <Text
+                                        color={
+                                            status.includes('COMPLETE')
+                                                ? 'green'
+                                                : status.includes('FAILED')
+                                                ? 'red'
+                                                : 'yellow'
+                                        }
+                                    >
+                                        {status}
+                                    </Text>
+                                );
+                            }
                         },
                         {
                             heading: 'Updated',
                             width: 10,
+                            value: (row) => row.LastUpdatedTime?.toISOString(),
                             render: (row) => (
                                 <Text>
                                     {row.LastUpdatedTime &&

@@ -20,13 +20,11 @@ export default class App extends Component<{}, {hasError: boolean}> {
     render() {
         if (this.state.hasError) return <Text color="red">Error!</Text>;
         return (
-            <Suspense>
-                <Screen>
-                    <EntyProvider>
-                        <Awst />
-                    </EntyProvider>
-                </Screen>
-            </Suspense>
+            <Screen>
+                <EntyProvider>
+                    <Awst />
+                </EntyProvider>
+            </Screen>
         );
     }
 }
@@ -40,23 +38,16 @@ export function Awst() {
     //Router.useInput(input, key);
     //});
     return (
-        <Box flexDirection="column">
-            <Box flexGrow={1} flexDirection="column" padding={1}>
-                {(() => {
-                    return <CloudFormation />;
-                    //const route = snap.route.at(-1) || 'home';
-                    //if (route === 'search') return <Search />;
-                    //if (route === 'devices') return <Devices />;
-                    //if (route.startsWith('spotify:album')) return <Album />;
-                    //if (route.startsWith('spotify:artist')) return <Artist />;
-                    //return <Home />;
-                })()}
-            </Box>
-            <Text wrap="truncate">{'▄'.repeat(width)}</Text>
-            <Box flexDirection="column" flexShrink={0}></Box>
-            <Box flexShrink={0}>
-                <Text wrap="truncate">/foo bar baz</Text>
-            </Box>
+        <Box flexGrow={1} flexDirection="column" padding={1}>
+            {(() => {
+                return <CloudFormation />;
+                //const route = snap.route.at(-1) || 'home';
+                //if (route === 'search') return <Search />;
+                //if (route === 'devices') return <Devices />;
+                //if (route.startsWith('spotify:album')) return <Album />;
+                //if (route.startsWith('spotify:artist')) return <Artist />;
+                //return <Home />;
+            })()}
         </Box>
     );
 }
