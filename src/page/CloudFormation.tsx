@@ -3,6 +3,8 @@ import {Box, Text, useApp, useInput, useStdout} from 'ink';
 import logger from '../service/logger.js';
 import {EntyProvider} from 'react-enty';
 import {useCloudFormationList} from '../model/cloudformation.js';
+import Table from '../affordance/Table.js';
+import {DateTime} from 'luxon';
 import sortBy from 'lodash-es/sortBy.js';
 
 export default function CloudFormation() {
@@ -16,26 +18,31 @@ export default function CloudFormation() {
 
     return (
         <Box flexDirection="column" overflow="visible">
-            <Box marginBottom={1}>
-                <Text bold>Cloud Formation Stacks</Text>
-            </Box>
-            {sortBy(stacks.data ?? [], (x) => x.StackName).map(
-                ({RootId, StackName, StackStatus}, index) => (
-                    <Box justifyContent="space-between" key={index}>
-                        <Text>{StackName}</Text>
-                        <Text
-                            color={
-                                StackStatus?.includes('COMPLETE')
-                                    ? 'green'
-                                    : StackStatus?.includes('FAILED')
-                                    ? 'red'
-                                    : undefined
-                            }
-                        >
-                            {StackStatus}
-                        </Text>
-                    </Box>
-                )
+            {stacks.data && (
+                <Table
+                    data={stacks.data}
+                    schema={[
+                        {
+                            heading: 'Stack',
+                            render: (row) => <Text>{row.StackName}</Text>
+                        },
+                        {
+                            heading: 'Status',
+                            width: 16,
+                            render: (row) => <Text>{row.StackStatus} </Text>
+                        },
+                        {
+                            heading: 'Updated',
+                            width: 10,
+                            render: (row) => (
+                                <Text>
+                                    {row.LastUpdatedTime &&
+                                        DateTime.fromJSDate(row.LastUpdatedTime).toISODate()}
+                                </Text>
+                            )
+                        }
+                    ]}
+                />
             )}
         </Box>
     );

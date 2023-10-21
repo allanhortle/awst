@@ -16,6 +16,7 @@
         "commander": "^11.1.0",
         "ink": "^4.4.1",
         "lodash-es": "^4.17.21",
+        "luxon": "^3.4.3",
         "react": "^18.2.0",
         "react-enty": "^3.0.0-alpha.3",
         "typescript": "^5.2.2",
@@ -23,8 +24,10 @@
     },
     "devDependencies": {
         "@types/ink": "^2.0.3",
+        "@types/luxon": "^3.3.3",
         "@types/node": "^20.8.7",
-        "@types/react": "^18.2.29",
-        "prettier": "^3.0.3"
+        "@types/react": "^18.2.31",
+        "prettier": "^3.0.3",
+        "react-devtools": "^4.28.4"
     }
 }

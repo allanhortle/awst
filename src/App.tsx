@@ -11,10 +11,12 @@ export default class App extends Component<{}, {hasError: boolean}> {
         super(props);
         this.state = {hasError: false};
     }
+
     static getDerivedStateFromError(error: Error) {
-        logger.error(error);
+        logger.error({...error});
         return {hasError: true};
     }
+
     render() {
         if (this.state.hasError) return <Text color="red">Error!</Text>;
         return (
@@ -39,8 +41,7 @@ export function Awst() {
     //});
     return (
         <Box flexDirection="column">
-            <Text wrap="truncate">{'▀'.repeat(width)}</Text>
-            <Box flexGrow={1} flexDirection="column" paddingX={2} paddingY={1}>
+            <Box flexGrow={1} flexDirection="column" padding={1}>
                 {(() => {
                     return <CloudFormation />;
                     //const route = snap.route.at(-1) || 'home';
@@ -51,7 +52,11 @@ export function Awst() {
                     //return <Home />;
                 })()}
             </Box>
-            <Text wrap="truncate">{'▀'.repeat(width)}</Text>
+            <Text wrap="truncate">{'▄'.repeat(width)}</Text>
+            <Box flexDirection="column" flexShrink={0}></Box>
+            <Box flexShrink={0}>
+                <Text wrap="truncate">/foo bar baz</Text>
+            </Box>
         </Box>
     );
 }
