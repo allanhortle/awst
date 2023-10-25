@@ -1,26 +1,31 @@
 import React, {useState, useEffect, useMemo} from 'react';
-import {Box, Text} from 'ink';
+import {Box, Text, useApp, useInput, useStdout} from 'ink';
+import logger from '../service/logger.js';
+import {EntyProvider} from 'react-enty';
 import {useCloudFormationList} from '../model/cloudformation.js';
 import Table from '../affordance/Table.js';
 import {DateTime} from 'luxon';
-import {useRoutes} from '../service/routes.js';
+import sortBy from 'lodash-es/sortBy.js';
 
-export default function CloudFormation() {
-    const stacks = useCloudFormationList();
-    const {cloudformationStack} = useRoutes();
-    useEffect(() => {
-        if (stacks.isEmpty) stacks.request();
-    }, []);
-    if (stacks.isEmpty) return null;
-    if (stacks.isFetching) return <Text>Loading...</Text>;
-    if (stacks.isError) throw stacks.error;
+export default function CloudFormation(props) {
+    return (
+        <Box>
+            <Text>STACK {props.args.stack}</Text>
+        </Box>
+    );
+    //const stacks = useCloudFormationList();
+    //useEffect(() => {string
+    //if (stacks.isEmpty) stacks.request();
+    //}, []);
+    //if (stacks.isEmpty) return null;
+    //if (stacks.isPending) return <Text>Loading...</Text>;
+    //if (stacks.isError) throw stacks.error;
 
     return (
         <Box flexDirection="column" overflow="visible">
             {stacks.data && (
                 <Table
                     data={stacks.data}
-                    onChange={(s) => cloudformationStack.push({stack: s.StackId})}
                     schema={[
                         {
                             heading: 'Stack',

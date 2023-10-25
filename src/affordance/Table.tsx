@@ -6,6 +6,7 @@ import TextInput from 'ink-text-input';
 
 type Props<T> = {
     data: Array<T>;
+    onChange?: (next: T) => void;
     schema: Array<{
         width?: number;
         heading: string;
@@ -13,7 +14,7 @@ type Props<T> = {
         render: (data: T) => React.ReactNode;
     }>;
 };
-export default function TableData<T>({data, schema}: Props<T>) {
+export default function TableData<T>({data, schema, onChange}: Props<T>) {
     const [query, setQuery] = useState('');
 
     const items = data
@@ -28,15 +29,25 @@ export default function TableData<T>({data, schema}: Props<T>) {
             return {data: ii, index};
         });
 
-    return <Table query={query} setQuery={setQuery} data={data} items={items} schema={schema} />;
+    return (
+        <Table
+            query={query}
+            onChange={onChange}
+            setQuery={setQuery}
+            data={data}
+            items={items}
+            schema={schema}
+        />
+    );
 }
 
 type TableProps<T> = Props<T> & {
     items: Array<{data: T; index: number}>;
     query: string;
     setQuery: (next: string) => void;
+    onChange?: (next: T) => void;
 };
-function Table<T>({items, schema, query, setQuery}: TableProps<T>) {
+function Table<T>({items, schema, query, setQuery, onChange}: TableProps<T>) {
     const [selected, setSelected] = useState(0);
     const [searching, setSearching] = useState(false);
     const {ref, width, height} = useElementSize();
@@ -56,7 +67,10 @@ function Table<T>({items, schema, query, setQuery}: TableProps<T>) {
             }
         }
 
-        if (code.return) setSearching(false);
+        if (code.return) {
+            setSearching(false);
+            onChange?.(items[selected].data);
+        }
 
         if (next >= items.length) next = 0;
         if (next < 0) next = items.length - 1;

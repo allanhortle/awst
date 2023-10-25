@@ -1,53 +1,57 @@
-import React, {Component, Suspense} from 'react';
-import logger from './service/logger.js';
+import React, {useEffect} from 'react';
 import Screen from './service/Screen.js';
-import CloudFormation from './page/CloudFormation.js';
-import {Text, Box, useApp} from 'ink';
-import useScreenSize from './service/useScreenSize.js';
+import {Box, Text, useApp, useInput} from 'ink';
 import {EntyProvider} from 'react-enty';
+import ErrorBoundary from './affordance/ErrorBoundary.js';
+import {routes, RoutesProvider, useRoutes} from './service/routes.js';
+import {MemoryRouter, Switch} from 'trouty';
+import logger from './service/logger.js';
+import {useHistory} from 'react-router-dom';
 
-export default class App extends Component<{}, {hasError: boolean}> {
-    constructor(props: {}) {
-        super(props);
-        this.state = {hasError: false};
-    }
-
-    static getDerivedStateFromError(error: Error) {
-        logger.error({...error});
-        return {hasError: true};
-    }
-
-    render() {
-        if (this.state.hasError) return <Text color="red">Error!</Text>;
-        return (
-            <Screen>
-                <EntyProvider>
-                    <Awst />
-                </EntyProvider>
-            </Screen>
-        );
-    }
+export default function App(props: {route: any}) {
+    return (
+        <Screen>
+            <MemoryRouter initialEntries={[props.route]}>
+                <Box flexGrow={1} flexDirection="column" padding={1}>
+                    <ErrorBoundary>
+                        <RoutesProvider>
+                            <EntyProvider>
+                                <Routes />
+                            </EntyProvider>
+                        </RoutesProvider>
+                    </ErrorBoundary>
+                </Box>
+            </MemoryRouter>
+        </Screen>
+    );
 }
 
-export function Awst() {
-    const {exit} = useApp();
-    const {width} = useScreenSize();
-    //Router.exit = exit;
-    //const snap = useSnapshot(Router);
-    //useInput((input, key) => {
-    //Router.useInput(input, key);
-    //});
+function Routes() {
+    const history = useHistory();
+    const app = useApp();
+    useEffect(() => {
+        return history.listen((change) => logger.info(change));
+    }, []);
+
+    useInput((input) => {
+        if (input === 'q') {
+            logger.info(history);
+            if (history.index === 0) app.exit();
+            history.goBack(1);
+        }
+    });
     return (
-        <Box flexGrow={1} flexDirection="column" padding={1}>
-            {(() => {
-                return <CloudFormation />;
-                //const route = snap.route.at(-1) || 'home';
-                //if (route === 'search') return <Search />;
-                //if (route === 'devices') return <Devices />;
-                //if (route.startsWith('spotify:album')) return <Album />;
-                //if (route.startsWith('spotify:artist')) return <Artist />;
-                //return <Home />;
-            })()}
+        <Switch>
+            {Object.values(routes)}
+            <NotFound />
+        </Switch>
+    );
+}
+
+function NotFound() {
+    return (
+        <Box>
+            <Text>Not Found</Text>
         </Box>
     );
 }
