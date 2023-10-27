@@ -36,7 +36,7 @@ function Routes() {
     useInput((input) => {
         if (input === 'q') {
             logger.info(history);
-            if (history.index === 0) app.exit();
+            if (history.length === 1) app.exit();
             history.goBack(1);
         }
     });

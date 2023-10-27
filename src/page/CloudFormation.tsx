@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useEffect} from 'react';
 import {Box, Text} from 'ink';
 import {useCloudFormationList} from '../model/cloudformation.js';
 import Table from '../affordance/Table.js';
@@ -20,7 +20,7 @@ export default function CloudFormation() {
             {stacks.data && (
                 <Table
                     data={stacks.data}
-                    onChange={(s) => cloudformationStack.push({stack: s.StackId})}
+                    onChange={(s) => s.StackId && cloudformationStack.push({stack: s.StackId})}
                     schema={[
                         {
                             heading: 'Stack',

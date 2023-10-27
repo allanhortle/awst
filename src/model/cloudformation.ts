@@ -10,3 +10,11 @@ export const useCloudFormationList = createRequestHook({
         return data.StackSummaries;
     }
 });
+
+export const useCloudFormationStack = createRequestHook({
+    name: 'CloudFormationStack',
+    request: async (StackId: string) => {
+        const data = await cfn.listStackResources({StackName: StackId});
+        return data.StackResourceSummaries;
+    }
+});

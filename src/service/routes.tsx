@@ -1,6 +1,7 @@
 import {BoringRoute, Route, Parse, createRouterContext} from 'trouty';
 import CloudFormation from '../page/CloudFormation.js';
 import CloudFormationStack from '../page/CloudFormationStack.js';
+import Lambda from '../page/Lambda.js';
 
 const router = createRouterContext({
     cloudformationList: BoringRoute({
@@ -11,6 +12,11 @@ const router = createRouterContext({
         path: '/cloudformationStack',
         parse: {stack: Parse.state((x) => String(x))},
         component: CloudFormationStack
+    }),
+    lambda: Route<{arn: string}>({
+        path: '/lambda',
+        parse: {arn: Parse.state((x) => String(x))},
+        component: Lambda
     })
 });
 

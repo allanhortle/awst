@@ -3,6 +3,9 @@ import React from 'react';
 import {Command} from 'commander';
 import App from './App.js';
 import {render} from 'ink';
+import logger from './service/logger.js';
+
+console.log = (x) => logger.info(x);
 
 const program = new Command();
 
@@ -13,7 +16,7 @@ program
     .description('browse cloudformation resources')
     .alias('cfn')
     .alias('cfm')
-    .argument('[stack]', 'The stack')
+    .argument('[stackArn]', 'The stack')
     .action((stack) => {
         render(
             <App
@@ -24,6 +27,13 @@ program
                 }
             />
         );
+    });
+
+program
+    .command('lambda')
+    .argument('<lambdaArn>')
+    .action((arn) => {
+        render(<App route={{pathname: '/lambda', state: {arn}}} />);
     });
 
 program.parse();

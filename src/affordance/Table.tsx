@@ -10,7 +10,7 @@ type Props<T> = {
     schema: Array<{
         width?: number;
         heading: string;
-        value: (data: T) => string | undefined | number | null;
+        value: (data: T) => string | undefined | number | Date | null;
         render: (data: T) => React.ReactNode;
     }>;
 };
@@ -21,9 +21,9 @@ export default function TableData<T>({data, schema, onChange}: Props<T>) {
         .filter((ii) => {
             if (!query) return true;
             return schema
-                .map((ss) => ss.value(ii))
+                .map((ss) => String(ss.value(ii)).toLowerCase())
                 .join('')
-                .includes(query);
+                .includes(query.toLowerCase());
         })
         .map((ii, index) => {
             return {data: ii, index};
@@ -78,10 +78,10 @@ function Table<T>({items, schema, query, setQuery, onChange}: TableProps<T>) {
     });
 
     // The sum of the widths declared by schema items
-    const fixedWidth = schema.reduce((rr, ii) => rr + (ii.width ?? 0) + 1, 0);
+    const fixedWidth = schema.reduce((rr, ii) => rr + (ii.width ?? 0), 0);
     const firstWidth = String(items.length).length;
 
-    const safeWidth = Math.max(0, (width ?? 0) - fixedWidth - schema.length - firstWidth);
+    const safeWidth = Math.max(0, (width ?? 0) - fixedWidth - schema.length - firstWidth - 2);
 
     const autoColumns = schema.reduce((rr, ii) => {
         if (ii.width == null) return rr + 1;
