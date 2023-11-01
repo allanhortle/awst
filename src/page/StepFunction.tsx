@@ -1,12 +1,10 @@
 import React from 'react';
-import {Box, Text} from 'ink';
-import {ARN} from 'link2aws';
+import {Text} from 'ink';
 import logger from '../service/logger.js';
 import {Parse, Route} from 'trouty';
 import useRequest from '../service/useRequest.js';
 import {open} from '../service/arn.js';
 import {SFN} from '@aws-sdk/client-sfn';
-import KeyValue from '../affordance/Keyvalue.js';
 import Table from '../affordance/Table.js';
 import DateTime from '../affordance/DateTime.js';
 
@@ -19,9 +17,7 @@ export default Route<{arn: string}>({
             key,
             request: async () => {
                 const sfn = new SFN({region: 'ap-southeast-2'});
-                const data = await sfn.listExecutions({stateMachineArn: key});
-                return data;
-                //return sfn.describeStateMachine({stateMachineArn: key});
+                return sfn.listExecutions({stateMachineArn: key});
             }
         });
         logger.info(data);
@@ -50,11 +46,6 @@ export default Route<{arn: string}>({
                                 default:
                                     <Text wrap="truncate">{row.status?.slice(0, 1)}</Text>;
                             }
-                            //readonly ABORTED: "ABORTED";
-                            //readonly FAILED: "FAILED";
-                            //readonly RUNNING: "RUNNING";
-                            //readonly SUCCEEDED: "SUCCEEDED";
-                            //readonly TIMED_OUT: "TIMED_OUT";
                         }
                     },
                     {
@@ -86,24 +77,6 @@ export default Route<{arn: string}>({
                     }
                 ]}
             />
-        );
-        const {name, status, creationDate, definition} = data ?? {};
-
-        return (
-            <Box flexDirection="column" overflow="visible" gap={1}>
-                <Text bold>{name}</Text>
-                <Text bold color="yellow">
-                    {new ARN(key).consoleLink}
-                </Text>
-                <KeyValue
-                    data={{
-                        name,
-                        status,
-                        creationDate: creationDate?.toISOString(),
-                        definition: JSON.stringify(JSON.parse(definition ?? '{}'), null, 4)
-                    }}
-                />
-            </Box>
         );
     }
 });

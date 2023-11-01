@@ -1,72 +1,58 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {Box, Text} from 'ink';
 import {ARN} from 'link2aws';
-import {useLambda} from '../model/lambda.js';
-import logger from '../service/logger.js';
-console.log = (x) => logger.info(x);
+import {Parse, Route} from 'trouty';
+import KeyValue from '../affordance/KeyValue.js';
+import {Lambda} from '@aws-sdk/client-lambda';
+import useRequest from '../service/useRequest.js';
 
-export default function Lambda(props: {args: {arn: string}}) {
-    const key = props.args.arn;
-    const lambda = useLambda({key});
-    useEffect(() => {
-        if (lambda.isEmpty) lambda.request(key);
-    }, [key]);
-    if (lambda.isEmpty || lambda.isFetching) return <Text>Loading...</Text>;
-    if (lambda.isError) throw lambda.error;
-    //logger.info(lambda.data);
-    logger.info(lambda.data);
+export default Route<{arn: string}>({
+    path: '/lambda',
+    parse: {arn: Parse.state((x) => String(x))},
+    component: (props: {args: {arn: string}}) => {
+        const key = props.args.arn;
+        const lambda = useRequest({
+            key,
+            request: async () => {
+                const lam = new Lambda({region: 'ap-southeast-2'});
+                return lam.getFunction({FunctionName: key});
+            }
+        });
+        if (!lambda) return null;
 
-    const {
-        Timeout,
-        FunctionName,
-        Handler,
-        MemorySize,
-        Runtime,
-        Architectures,
-        CodeSize,
-        FunctionArn,
-        Description,
-        Environment
-    } = lambda.data.Configuration ?? {};
+        const {
+            Timeout,
+            FunctionName,
+            Handler,
+            MemorySize,
+            Runtime,
+            Architectures,
+            CodeSize,
+            FunctionArn,
+            Description
+        } = lambda.Configuration ?? {};
 
-    return (
-        <Box flexDirection="column" overflow="visible" gap={1}>
-            <Text bold>{FunctionName}</Text>
-            <Text bold color="yellow">
-                {new ARN(FunctionArn).consoleLink}
-            </Text>
-            <KeyValue
-                data={{
-                    Handler,
-                    Runtime,
-                    Architectures,
-                    Timeout,
-                    CodeSize,
-                    MemorySize,
-                    Description,
-                    FunctionArn
-                }}
-            />
+        return (
+            <Box flexDirection="column" overflow="visible" gap={1}>
+                <Text bold>{FunctionName}</Text>
+                <Text bold color="yellow">
+                    {new ARN(key).consoleLink}
+                </Text>
+                <KeyValue
+                    data={{
+                        Handler,
+                        Runtime,
+                        Architectures,
+                        Timeout,
+                        CodeSize,
+                        MemorySize,
+                        Description,
+                        FunctionArn
+                    }}
+                />
 
-            <KeyValue data={{Tags: '', ...lambda.data.Tags}} />
-        </Box>
-    );
-}
-
-function KeyValue(props: {data: Record<string, React.ReactNode>}) {
-    const entries = Object.entries(props.data);
-    const keyWidth = entries.reduce((rr, ii) => Math.max(rr, ii[0].length), 0);
-
-    return (
-        <Box flexDirection="column" overflow="visible">
-            {Object.entries(props.data).map(([key, value]) => (
-                <Box key={key} gap={2}>
-                    <Box flexShrink={0} width={keyWidth}>
-                        <Text bold>{key}</Text>
-                    </Box>
-                    <Text>{Array.isArray(value) ? value.join(', ') : value}</Text>
-                </Box>
-            ))}
-        </Box>
-    );
-}
+                <KeyValue data={{Tags: '', ...lambda.Tags}} />
+            </Box>
+        );
+    }
+});

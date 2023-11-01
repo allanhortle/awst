@@ -39,7 +39,7 @@ function Routes() {
         if (input === 'q') {
             logger.info(history);
             if (history.length === 1) app.exit();
-            history.goBack(1);
+            history.goBack();
         }
     });
     return (
