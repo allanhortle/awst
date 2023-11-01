@@ -11,8 +11,7 @@ export default function Lambda(props: {args: {arn: string}}) {
     useEffect(() => {
         if (lambda.isEmpty) lambda.request(key);
     }, [key]);
-    if (lambda.isEmpty) return null;
-    if (lambda.isFetching) return <Text>Loading...</Text>;
+    if (lambda.isEmpty || lambda.isFetching) return <Text>Loading...</Text>;
     if (lambda.isError) throw lambda.error;
     //logger.info(lambda.data);
     logger.info(lambda.data);

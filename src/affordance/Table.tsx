@@ -5,7 +5,7 @@ import useElementSize from '../service/useElementSize.js';
 import TextInput from 'ink-text-input';
 
 type Props<T> = {
-    data: Array<T>;
+    data: Array<T> | Array<never>;
     onChange?: (next: T) => void;
     schema: Array<{
         width?: number;

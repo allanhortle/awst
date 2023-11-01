@@ -26,6 +26,8 @@ export default function CloudFormation(props: {args: {stack: string}}) {
                         switch (next.ResourceType) {
                             case 'AWS::Lambda::Function':
                                 return routes.lambda.push({arn: next.PhysicalResourceId});
+                            case 'AWS::StepFunctions::StateMachine':
+                                return routes.stepfunction.push({arn: next.PhysicalResourceId});
                         }
                     }}
                     schema={[

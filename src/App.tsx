@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {Suspense, useEffect} from 'react';
 import Screen from './service/Screen.js';
 import {Box, Text, useApp, useInput} from 'ink';
 import {EntyProvider} from 'react-enty';
@@ -16,7 +16,9 @@ export default function App(props: {route: any}) {
                     <ErrorBoundary>
                         <RoutesProvider>
                             <EntyProvider>
-                                <Routes />
+                                <Suspense fallback={<Text>LOADING...</Text>}>
+                                    <Routes />
+                                </Suspense>
                             </EntyProvider>
                         </RoutesProvider>
                     </ErrorBoundary>

@@ -13,6 +13,7 @@
     "dependencies": {
         "@aws-sdk/client-cloudformation": "^3.431.0",
         "@aws-sdk/client-lambda": "^3.436.0",
+        "@aws-sdk/client-sfn": "^3.438.0",
         "@types/lodash-es": "^4.17.10",
         "@types/react-router-dom": "5",
         "commander": "^11.1.0",
@@ -22,6 +23,7 @@
         "link2aws": "^1.0.16",
         "lodash-es": "^4.17.21",
         "luxon": "^3.4.3",
+        "open": "^9.1.0",
         "react": "^18.2.0",
         "react-enty": "^3.0.0-alpha.3",
         "trouty": "^0.9.1",
@@ -30,6 +32,7 @@
     },
     "devDependencies": {
         "@types/ink": "^2.0.3",
+        "@types/link2aws": "^1.0.2",
         "@types/luxon": "^3.3.3",
         "@types/node": "^20.8.7",
         "@types/react": "^18.2.31",

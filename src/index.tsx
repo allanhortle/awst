@@ -3,9 +3,6 @@ import React from 'react';
 import {Command} from 'commander';
 import App from './App.js';
 import {render} from 'ink';
-import logger from './service/logger.js';
-
-console.log = (x) => logger.info(x);
 
 const program = new Command();
 
@@ -34,6 +31,14 @@ program
     .argument('<lambdaArn>')
     .action((arn) => {
         render(<App route={{pathname: '/lambda', state: {arn}}} />);
+    });
+
+program
+    .command('stepfunction')
+    .alias('sfn')
+    .argument('<arn>')
+    .action((arn) => {
+        render(<App route={{pathname: '/stepfunction', state: {arn}}} />);
     });
 
 program.parse();
