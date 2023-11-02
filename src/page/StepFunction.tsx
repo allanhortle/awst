@@ -4,9 +4,9 @@ import logger from '../service/logger.js';
 import {Parse, Route} from 'trouty';
 import useRequest from '../service/useRequest.js';
 import {open} from '../service/arn.js';
-import {SFN} from '@aws-sdk/client-sfn';
 import Table from '../affordance/Table.js';
 import DateTime from '../affordance/DateTime.js';
+import {sfn} from '../service/aws.js';
 
 export default Route<{arn: string}>({
     path: '/stepfunction',
@@ -16,11 +16,9 @@ export default Route<{arn: string}>({
         const data = useRequest({
             key,
             request: async () => {
-                const sfn = new SFN({region: 'ap-southeast-2'});
                 return sfn.listExecutions({stateMachineArn: key});
             }
         });
-        logger.info(data);
         if (!data) return null;
 
         return (

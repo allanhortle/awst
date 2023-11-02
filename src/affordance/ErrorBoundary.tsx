@@ -2,19 +2,19 @@ import React from 'react';
 import {Text} from 'ink';
 import logger from '../service/logger.js';
 
-export default class ErrorBoundary extends React.Component<{children: any}, {hasError: boolean}> {
+export default class ErrorBoundary extends React.Component<{children: any}, {error: null | Error}> {
     constructor(props: {children: any}) {
         super(props);
-        this.state = {hasError: false};
+        this.state = {error: null};
     }
 
     static getDerivedStateFromError(error: Error) {
-        logger.error({...error});
-        return {hasError: true};
+        logger.error({message: error.message, stack: error.stack, cause: error.cause});
+        return {error};
     }
 
     render() {
-        if (this.state.hasError) return <Text color="red">Error!</Text>;
+        if (this.state.error) return <Text color="red">{this.state.error.toString()}</Text>;
         return this.props.children;
     }
 }

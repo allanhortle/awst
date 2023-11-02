@@ -1,11 +1,11 @@
-import React, {Suspense, useEffect} from 'react';
+import React, {Suspense} from 'react';
 import Screen from './service/Screen.js';
 import {Box, Text, useApp, useInput} from 'ink';
 import {EntyProvider} from 'react-enty';
 import ErrorBoundary from './affordance/ErrorBoundary.js';
-import {routes, RoutesProvider, useRoutes} from './service/routes.js';
+import Spinner from './affordance/Spinner.js';
+import {routes, RoutesProvider} from './service/routes.js';
 import {MemoryRouter, Switch} from 'trouty';
-import logger from './service/logger.js';
 import {useHistory} from 'react-router-dom';
 
 export default function App(props: {route: any}) {
@@ -16,7 +16,7 @@ export default function App(props: {route: any}) {
                     <ErrorBoundary>
                         <RoutesProvider>
                             <EntyProvider>
-                                <Suspense fallback={<Text>LOADING...</Text>}>
+                                <Suspense fallback={<Spinner />}>
                                     <Routes />
                                 </Suspense>
                             </EntyProvider>
@@ -31,13 +31,9 @@ export default function App(props: {route: any}) {
 function Routes() {
     const history = useHistory();
     const app = useApp();
-    useEffect(() => {
-        return history.listen((change) => logger.info(change));
-    }, []);
 
     useInput((input) => {
         if (input === 'q') {
-            logger.info(history);
             if (history.length === 1) app.exit();
             history.goBack();
         }

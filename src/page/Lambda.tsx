@@ -1,10 +1,12 @@
 import React from 'react';
-import {Box, Text} from 'ink';
+import {Box, Spacer, Text} from 'ink';
 import {ARN} from 'link2aws';
 import {Parse, Route} from 'trouty';
 import KeyValue from '../affordance/KeyValue.js';
-import {Lambda} from '@aws-sdk/client-lambda';
 import useRequest from '../service/useRequest.js';
+import {lam} from '../service/aws.js';
+import logger from '../service/logger.js';
+import ActionBar from '../affordance/ActionBar.js';
 
 export default Route<{arn: string}>({
     path: '/lambda',
@@ -14,7 +16,7 @@ export default Route<{arn: string}>({
         const lambda = useRequest({
             key,
             request: async () => {
-                const lam = new Lambda({region: 'ap-southeast-2'});
+                logger.info({key});
                 return lam.getFunction({FunctionName: key});
             }
         });
@@ -31,15 +33,16 @@ export default Route<{arn: string}>({
             FunctionArn,
             Description
         } = lambda.Configuration ?? {};
+        logger.info('here');
 
         return (
-            <Box flexDirection="column" overflow="visible" gap={1}>
-                <Text bold>{FunctionName}</Text>
-                <Text bold color="yellow">
-                    {new ARN(key).consoleLink}
-                </Text>
+            <Box flexDirection="column" overflow="visible">
+                <Text bold>Lambda » {FunctionName}</Text>
+                <ActionBar open={FunctionArn} copyArn={FunctionArn} />
+                <Box marginBottom={1} />
                 <KeyValue
                     data={{
+                        FunctionArn,
                         Handler,
                         Runtime,
                         Architectures,
@@ -47,11 +50,11 @@ export default Route<{arn: string}>({
                         CodeSize,
                         MemorySize,
                         Description,
-                        FunctionArn
+                        ' ': '',
+                        Tags: '',
+                        ...lambda.Tags
                     }}
                 />
-
-                <KeyValue data={{Tags: '', ...lambda.Tags}} />
             </Box>
         );
     }
