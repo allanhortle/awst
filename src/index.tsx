@@ -8,12 +8,28 @@ const program = new Command();
 
 program.name('awst').description('AWS TUI').version('0.0.0');
 
+[
+    {command: 'lambda'},
+    {command: 'stepfunction', aliases: ['sfn']},
+    {command: 'iam'},
+    {command: 'iam-policy'},
+    {command: 's3'}
+].forEach(({command, aliases = []}) => {
+    program
+        .command(command)
+        .argument('<name>')
+        .aliases(aliases)
+        .action((arn) => {
+            render(<App route={{pathname: `/${command}`, state: {arn}}} />);
+        });
+});
+
 program
     .command('cloudformation')
     .description('browse cloudformation resources')
     .alias('cfn')
     .alias('cfm')
-    .argument('[stackArn]', 'The stack')
+    .argument('[name]', 'The stack')
     .action((stack) => {
         render(
             <App
@@ -24,21 +40,6 @@ program
                 }
             />
         );
-    });
-
-program
-    .command('lambda')
-    .argument('<lambdaArn>')
-    .action((arn) => {
-        render(<App route={{pathname: '/lambda', state: {arn}}} />);
-    });
-
-program
-    .command('stepfunction')
-    .alias('sfn')
-    .argument('<arn>')
-    .action((arn) => {
-        render(<App route={{pathname: '/stepfunction', state: {arn}}} />);
     });
 
 program.parse();

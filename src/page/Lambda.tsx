@@ -16,7 +16,6 @@ export default Route<{arn: string}>({
         const lambda = useRequest({
             key,
             request: async () => {
-                logger.info({key});
                 return lam.getFunction({FunctionName: key});
             }
         });
@@ -33,7 +32,6 @@ export default Route<{arn: string}>({
             FunctionArn,
             Description
         } = lambda.Configuration ?? {};
-        logger.info('here');
 
         return (
             <Box flexDirection="column" overflow="visible">

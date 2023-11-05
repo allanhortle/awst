@@ -34,7 +34,8 @@ function Routes() {
 
     useInput((input) => {
         if (input === 'q') {
-            if (history.length === 1) app.exit();
+            // @ts-ignore
+            if (history.index === 0) app.exit();
             history.goBack();
         }
     });
