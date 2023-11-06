@@ -13,15 +13,13 @@ export default function App(props: {route: any}) {
         <Screen>
             <MemoryRouter initialEntries={[props.route]}>
                 <Box flexGrow={1} flexDirection="column" padding={1}>
-                    <ErrorBoundary>
-                        <RoutesProvider>
-                            <EntyProvider>
-                                <Suspense fallback={<Spinner />}>
-                                    <Routes />
-                                </Suspense>
-                            </EntyProvider>
-                        </RoutesProvider>
-                    </ErrorBoundary>
+                    <RoutesProvider>
+                        <EntyProvider>
+                            <Suspense fallback={<Spinner />}>
+                                <Routes />
+                            </Suspense>
+                        </EntyProvider>
+                    </RoutesProvider>
                 </Box>
             </MemoryRouter>
         </Screen>
@@ -40,10 +38,12 @@ function Routes() {
         }
     });
     return (
-        <Switch>
-            {Object.values(routes)}
-            <NotFound />
-        </Switch>
+        <ErrorBoundary resetKey={history.location.pathname}>
+            <Switch>
+                {Object.values(routes)}
+                <NotFound />
+            </Switch>
+        </ErrorBoundary>
     );
 }
 

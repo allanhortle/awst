@@ -19,54 +19,52 @@ export default BoringRoute({
             }
         });
         if (!stacks) return null;
+        const rows = stacks.map((row) => {
+            const status = row.StackStatus ?? '';
+            return {
+                onChange: () => row.StackId && cloudformationStack.push({arn: row.StackId}),
+                columns: [
+                    {
+                        heading: 'Stack',
+                        value: row.StackName,
+                        children: <Text wrap="truncate">{row.StackName}</Text>
+                    },
+                    {
+                        heading: 'Status',
+                        width: 24,
+                        value: row.StackStatus,
+                        children: (
+                            <Text
+                                color={
+                                    status.includes('COMPLETE')
+                                        ? 'green'
+                                        : status.includes('FAILED')
+                                        ? 'red'
+                                        : 'yellow'
+                                }
+                            >
+                                {status}
+                            </Text>
+                        )
+                    },
+                    {
+                        heading: 'Updated',
+                        width: 10,
+                        value: row.LastUpdatedTime?.toISOString(),
+                        children: (
+                            <Text>
+                                {row.LastUpdatedTime &&
+                                    DateTime.fromJSDate(row.LastUpdatedTime).toISODate()}
+                            </Text>
+                        )
+                    }
+                ]
+            };
+        });
 
         return (
             <Box flexDirection="column" overflow="visible">
-                {stacks && (
-                    <Table
-                        data={stacks}
-                        onChange={(s) => s.StackId && cloudformationStack.push({arn: s.StackId})}
-                        schema={[
-                            {
-                                heading: 'Stack',
-                                value: (row) => row.StackName,
-                                render: (row) => <Text wrap="truncate">{row.StackName}</Text>
-                            },
-                            {
-                                heading: 'Status',
-                                width: 24,
-                                value: (row) => row.StackStatus,
-                                render: (row) => {
-                                    const status = row.StackStatus ?? '';
-                                    return (
-                                        <Text
-                                            color={
-                                                status.includes('COMPLETE')
-                                                    ? 'green'
-                                                    : status.includes('FAILED')
-                                                    ? 'red'
-                                                    : 'yellow'
-                                            }
-                                        >
-                                            {status}
-                                        </Text>
-                                    );
-                                }
-                            },
-                            {
-                                heading: 'Updated',
-                                width: 10,
-                                value: (row) => row.LastUpdatedTime?.toISOString(),
-                                render: (row) => (
-                                    <Text>
-                                        {row.LastUpdatedTime &&
-                                            DateTime.fromJSDate(row.LastUpdatedTime).toISODate()}
-                                    </Text>
-                                )
-                            }
-                        ]}
-                    />
-                )}
+                <Table rows={rows} />
             </Box>
         );
     }

@@ -1,53 +1,38 @@
 import {Box, Text, useInput} from 'ink';
-import React, {useMemo, useState} from 'react';
-import logger from '../service/logger.js';
+import React, {useState} from 'react';
 import useElementSize from '../service/useElementSize.js';
 import TextInput from 'ink-text-input';
 
-type Props<T> = {
-    data: Array<T> | Array<never>;
-    onChange?: (next: T) => void;
-    schema: Array<{
-        width?: number;
-        heading: string;
-        value: (data: T) => string | undefined | number | Date | null;
-        render: (data: T) => React.ReactNode;
+type Props = {
+    rows: Array<{
+        onChange?: () => void;
+        columns: Array<{
+            heading: string;
+            children: React.ReactNode;
+            value?: string | number | Date | null;
+            width?: number;
+        }>;
     }>;
 };
-export default function TableData<T>({data, schema, onChange}: Props<T>) {
+export default function TableData(props: Props) {
     const [query, setQuery] = useState('');
 
-    const items = data
-        .filter((ii) => {
-            if (!query) return true;
-            return schema
-                .map((ss) => String(ss.value(ii)).toLowerCase())
-                .join('')
-                .includes(query.toLowerCase());
-        })
-        .map((ii, index) => {
-            return {data: ii, index};
-        });
+    const rows = props.rows.filter((row) => {
+        if (!query) return true;
+        return row.columns
+            .map((column) => String(column.value).toLowerCase())
+            .join('')
+            .includes(query.toLowerCase());
+    });
 
-    return (
-        <Table
-            query={query}
-            onChange={onChange}
-            setQuery={setQuery}
-            data={data}
-            items={items}
-            schema={schema}
-        />
-    );
+    return <Table query={query} setQuery={setQuery} rows={rows} />;
 }
 
-type TableProps<T> = Props<T> & {
-    items: Array<{data: T; index: number}>;
+type TableProps = Props & {
     query: string;
     setQuery: (next: string) => void;
-    onChange?: (next: T) => void;
 };
-function Table<T>({items, schema, query, setQuery, onChange}: TableProps<T>) {
+function Table({rows, query, setQuery}: TableProps) {
     const [selected, setSelected] = useState(0);
     const [searching, setSearching] = useState(false);
     const {ref, width, height} = useElementSize();
@@ -69,17 +54,18 @@ function Table<T>({items, schema, query, setQuery, onChange}: TableProps<T>) {
 
         if (code.return) {
             setSearching(false);
-            onChange?.(items[selected].data);
+            rows[selected].onChange?.();
         }
 
-        if (next >= items.length) next = 0;
-        if (next < 0) next = items.length - 1;
+        if (next >= rows.length) next = 0;
+        if (next < 0) next = rows.length - 1;
         setSelected(next);
     });
 
     // The sum of the widths declared by schema items
+    const schema = rows[0].columns;
     const fixedWidth = schema.reduce((rr, ii) => rr + (ii.width ?? 0), 0);
-    const firstWidth = String(items.length).length;
+    const firstWidth = String(rows.length).length;
 
     const safeWidth = Math.max(0, (width ?? 0) - fixedWidth - schema.length - firstWidth - 2);
 
@@ -111,24 +97,23 @@ function Table<T>({items, schema, query, setQuery, onChange}: TableProps<T>) {
                     ))
                 )}
             </Box>
-            {items.slice(start, end).map((row) => {
+            {rows.slice(start, end).map((row, index) => {
                 return (
-                    <Box key={row.index} overflow="hidden" gap={1}>
+                    <Box key={index} overflow="hidden" gap={1}>
                         <Box flexShrink={0} width={firstWidth}>
-                            {selected === row.index ? (
+                            {selected === index ? (
                                 <Text>{'>'}</Text>
                             ) : (
-                                <Text color="grey">{row.index}</Text>
+                                <Text color="grey">{index}</Text>
                             )}
                         </Box>
 
-                        {schema.map((ss) => (
+                        {row.columns.map((column) => (
                             <Box
                                 overflow="hidden"
-                                width={ss.width ?? Math.floor(safeWidth / autoColumns)}
-                            >
-                                {ss.render(row.data)}
-                            </Box>
+                                width={column.width ?? Math.floor(safeWidth / autoColumns)}
+                                children={column.children}
+                            />
                         ))}
                     </Box>
                 );

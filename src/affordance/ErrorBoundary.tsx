@@ -2,8 +2,11 @@ import React from 'react';
 import {Text} from 'ink';
 import logger from '../service/logger.js';
 
-export default class ErrorBoundary extends React.Component<{children: any}, {error: null | Error}> {
-    constructor(props: {children: any}) {
+export default class ErrorBoundary extends React.Component<
+    {children: any; resetKey: string},
+    {error: null | Error}
+> {
+    constructor(props: {children: any; resetKey?: string}) {
         super(props);
         this.state = {error: null};
     }
@@ -11,6 +14,12 @@ export default class ErrorBoundary extends React.Component<{children: any}, {err
     static getDerivedStateFromError(error: Error) {
         logger.error({message: error.message, stack: error.stack, cause: error.cause});
         return {error};
+    }
+
+    componentDidUpdate(prevProps: {resetKey?: string}) {
+        if (this.state.error !== null && prevProps.resetKey !== this.props.resetKey) {
+            this.setState({error: null});
+        }
     }
 
     render() {

@@ -7,6 +7,8 @@ import {Parse, Route} from 'trouty';
 import useRequest from '../service/useRequest.js';
 import {cfn} from '../service/aws.js';
 import {sortBy} from '../service/array.js';
+import {StackResourceSummary} from '@aws-sdk/client-cloudformation';
+import logger from '../service/logger.js';
 
 const sortOrder = [
     'AWS::Lambda::Function',
@@ -31,95 +33,80 @@ export default Route<{arn: string}>({
         });
         if (!stack) return null;
 
-        const data = stack.map((row) => {
-            return [
-                {
-                    heading: 'Id',
-                    sort: row.LogicalResourceId,
-                    render: <Text>{row.LogicalResourceId}</Text>
-                },
-                {
-                    heading: 'Type',
-                    width: 20,
-                    sort: row.ResourceType,
-                    render: <Text>{row.ResourceType}</Text>
-                }
-            ];
+        const rows = sortBy(stack, (x) => sortOrder.indexOf(x.ResourceType ?? '')).map((row) => {
+            const status = row.ResourceStatus ?? '';
+            let onChange: undefined | (() => void) = undefined;
+
+            switch (row.ResourceType) {
+                case 'AWS::IAM::Role':
+                    onChange = () => routes.iamRole.push({arn: row.PhysicalResourceId});
+                    break;
+                case 'AWS::IAM::Policy':
+                    onChange = () => routes.iamPolicy.push({arn: row.PhysicalResourceId});
+                    break;
+                case 'AWS::Lambda::Function':
+                    onChange = () => routes.lambda.push({arn: row.PhysicalResourceId});
+                    break;
+                case 'AWS::StepFunctions::StateMachine':
+                    onChange = () => routes.stepfunction.push({arn: row.PhysicalResourceId});
+                    break;
+            }
+
+            return {
+                onChange,
+                columns: [
+                    {
+                        heading: 'Id',
+                        value: row.LogicalResourceId,
+                        children: <Text wrap="truncate">{row.LogicalResourceId}</Text>
+                    },
+                    {
+                        heading: 'Type',
+                        value: row.ResourceType,
+                        width: 20,
+                        children: (
+                            <Text wrap="truncate" color={onChange ? undefined : 'grey'}>
+                                {row.ResourceType?.split('::').slice(1).join(' ')}
+                            </Text>
+                        )
+                    },
+                    {
+                        heading: 'Status',
+                        width: 15,
+                        value: row.ResourceStatus,
+                        children: (
+                            <Text
+                                wrap="truncate"
+                                color={
+                                    status.includes('COMPLETE')
+                                        ? 'green'
+                                        : status.includes('FAILED')
+                                        ? 'red'
+                                        : 'yellow'
+                                }
+                            >
+                                {status}
+                            </Text>
+                        )
+                    },
+                    {
+                        heading: 'Updated',
+                        width: 10,
+                        value: row.LastUpdatedTimestamp,
+                        children: (
+                            <Text>
+                                {row.LastUpdatedTimestamp &&
+                                    DateTime.fromJSDate(row.LastUpdatedTimestamp).toISODate()}
+                            </Text>
+                        )
+                    }
+                ]
+            };
         });
+
         return (
             <Box flexDirection="column" overflow="visible">
-                {stack && (
-                    <Table
-                        data={sortBy(stack, (x) => sortOrder.indexOf(x.ResourceType ?? ''))}
-                        onChange={(next) => {
-                            if (!next.PhysicalResourceId) return;
-                            switch (next.ResourceType) {
-                                case 'AWS::IAM::Role':
-                                    return routes.iamRole.push({arn: next.PhysicalResourceId});
-                                case 'AWS::IAM::Policy':
-                                    return routes.iamPolicy.push({arn: next.PhysicalResourceId});
-                                case 'AWS::Lambda::Function':
-                                    return routes.lambda.push({arn: next.PhysicalResourceId});
-                                case 'AWS::StepFunctions::StateMachine':
-                                    return routes.stepfunction.push({arn: next.PhysicalResourceId});
-                            }
-                        }}
-                        schema={[
-                            {
-                                heading: 'Id',
-                                value: (row) => row.LogicalResourceId,
-                                render: (row) => (
-                                    <Text wrap="truncate">{row.LogicalResourceId}</Text>
-                                )
-                            },
-                            {
-                                heading: 'Type',
-                                value: (row) => row.ResourceType,
-                                width: 20,
-                                render: (row) => (
-                                    <Text wrap="truncate">
-                                        {row.ResourceType?.split('::').slice(1).join(' ')}
-                                    </Text>
-                                )
-                            },
-                            {
-                                heading: 'Status',
-                                width: 15,
-                                value: (row) => row.ResourceStatus,
-                                render: (row) => {
-                                    const status = row.ResourceStatus ?? '';
-                                    return (
-                                        <Text
-                                            wrap="truncate"
-                                            color={
-                                                status.includes('COMPLETE')
-                                                    ? 'green'
-                                                    : status.includes('FAILED')
-                                                    ? 'red'
-                                                    : 'yellow'
-                                            }
-                                        >
-                                            {status}
-                                        </Text>
-                                    );
-                                }
-                            },
-                            {
-                                heading: 'Updated',
-                                width: 10,
-                                value: (row) => row.LastUpdatedTimestamp,
-                                render: (row) => (
-                                    <Text>
-                                        {row.LastUpdatedTimestamp &&
-                                            DateTime.fromJSDate(
-                                                row.LastUpdatedTimestamp
-                                            ).toISODate()}
-                                    </Text>
-                                )
-                            }
-                        ]}
-                    />
-                )}
+                {stack && <Table rows={rows} />}
             </Box>
         );
     }
