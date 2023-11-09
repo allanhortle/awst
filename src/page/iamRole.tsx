@@ -42,32 +42,35 @@ export default Route<{arn: string}>({
         if (!data) return null;
         const arn = data.role.Role?.Arn ?? '';
 
+        const rows = data.policies.map((row) => {
+            return {
+                onChange: () => {
+                    row.type === 'Inline'
+                        ? routes.iamPolicy.push({PolicyName: row.name, RoleName: row.roleName})
+                        : routes.iamPolicy.push({arn: row.arn});
+                },
+                columns: [
+                    {
+                        heading: 'Type',
+                        value: row.type,
+                        width: 10,
+                        children: <Text>{row.type}</Text>
+                    },
+                    {
+                        heading: 'Document',
+                        value: row.name,
+                        children: <Text>{row.name}</Text>
+                    }
+                ]
+            };
+        });
+
         return (
             <Box flexDirection="column" overflow="visible">
                 <Text bold>IAM Role » {key}</Text>
                 <ActionBar open={arn} copyArn={arn} />
                 <Box marginBottom={1} />
-                <Table
-                    data={data.policies}
-                    onChange={(x) =>
-                        x.type === 'Inline'
-                            ? routes.iamPolicy.push({PolicyName: x.name, RoleName: x.roleName})
-                            : routes.iamPolicy.push({arn: x.arn})
-                    }
-                    schema={[
-                        {
-                            heading: 'Type',
-                            value: (x) => x.type,
-                            width: 10,
-                            render: (x) => <Text>{x.type}</Text>
-                        },
-                        {
-                            heading: 'Document',
-                            value: (x) => x.name,
-                            render: (x) => <Text>{x.name}</Text>
-                        }
-                    ]}
-                />
+                <Table rows={rows} />
             </Box>
         );
     }
