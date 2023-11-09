@@ -3,7 +3,7 @@ import {Text} from 'ink';
 import logger from '../service/logger.js';
 
 export default class ErrorBoundary extends React.Component<
-    {children: any; resetKey: string},
+    {children: any; resetKey?: string},
     {error: null | Error}
 > {
     constructor(props: {children: any; resetKey?: string}) {

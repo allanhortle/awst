@@ -7,15 +7,13 @@ import {Parse, Route} from 'trouty';
 import useRequest from '../service/useRequest.js';
 import {cfn} from '../service/aws.js';
 import {sortBy} from '../service/array.js';
-import {StackResourceSummary} from '@aws-sdk/client-cloudformation';
-import logger from '../service/logger.js';
 
 const sortOrder = [
     'AWS::Lambda::Function',
     'AWS::StepFunctions::StateMachine',
-    'AWS::CDK::Metadata',
     'AWS::IAM::Role',
-    'AWS::IAM::Policy'
+    'AWS::IAM::Policy',
+    'AWS::CDK::Metadata',
 ];
 
 export default Route<{arn: string}>({
@@ -39,16 +37,16 @@ export default Route<{arn: string}>({
 
             switch (row.ResourceType) {
                 case 'AWS::IAM::Role':
-                    onChange = () => routes.iamRole.push({arn: row.PhysicalResourceId});
+                    onChange = () => routes.iamRole.push({arn: row.PhysicalResourceId ?? ''});
                     break;
                 case 'AWS::IAM::Policy':
-                    onChange = () => routes.iamPolicy.push({arn: row.PhysicalResourceId});
+                    onChange = () => routes.iamPolicy.push({arn: row.PhysicalResourceId ?? ''});
                     break;
                 case 'AWS::Lambda::Function':
-                    onChange = () => routes.lambda.push({arn: row.PhysicalResourceId});
+                    onChange = () => routes.lambda.push({arn: row.PhysicalResourceId ?? ''});
                     break;
                 case 'AWS::StepFunctions::StateMachine':
-                    onChange = () => routes.stepfunction.push({arn: row.PhysicalResourceId});
+                    onChange = () => routes.stepfunction.push({arn: row.PhysicalResourceId ?? ''});
                     break;
             }
 
