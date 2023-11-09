@@ -1,6 +1,5 @@
 import React from 'react';
 import {Text} from 'ink';
-import logger from '../service/logger.js';
 import {Parse, Route} from 'trouty';
 import useRequest from '../service/useRequest.js';
 import {open} from '../service/arn.js';
@@ -21,16 +20,18 @@ export default Route<{arn: string}>({
         });
         if (!data) return null;
 
-        return (
-            <Table
-                data={data.executions ?? []}
-                onChange={(item) => open(item.executionArn)}
-                schema={[
+        const rows = (data.executions ?? []).map((row) => {
+            const start = row.startDate?.getTime();
+            const stop = row.stopDate?.getTime();
+            const duration = !start || !stop ? 0 : stop - start;
+            return {
+                onChange: () => open(row.executionArn),
+                columns: [
                     {
                         heading: '',
-                        value: (row) => row.status,
+                        value: row.status,
                         width: 1,
-                        render: (row) => {
+                        children: (() => {
                             switch (row.status) {
                                 case 'SUCCEEDED':
                                     return <Text color="green">✔</Text>;
@@ -44,37 +45,31 @@ export default Route<{arn: string}>({
                                 default:
                                     <Text wrap="truncate">{row.status?.slice(0, 1)}</Text>;
                             }
-                        }
+                        })()
                     },
                     {
                         heading: 'Duration',
-                        value: (row) => {
-                            const start = row.startDate?.getTime();
-                            const stop = row.stopDate?.getTime();
-                            if (!start || !stop) return 0;
-                            return stop - start;
-                        },
-                        render: (row) => {
-                            const start = row.startDate?.getTime();
-                            const stop = row.stopDate?.getTime();
-                            if (!start || !stop) return <Text>-</Text>;
-                            return (
-                                <Text wrap="truncate">{((stop - start) / 1000).toFixed(2)}s</Text>
-                            );
-                        }
+                        value: duration,
+                        children: duration ? (
+                            <Text wrap="truncate">{(duration / 1000).toFixed(2)}s</Text>
+                        ) : (
+                            <Text>-</Text>
+                        )
                     },
                     {
                         heading: 'Start',
-                        value: (row) => row.startDate,
-                        render: (row) => <DateTime>{row.startDate}</DateTime>
+                        value: row.startDate,
+                        children: <DateTime>{row.startDate}</DateTime>
                     },
                     {
                         heading: 'Stop',
-                        value: (row) => row.stopDate,
-                        render: (row) => <DateTime>{row.stopDate}</DateTime>
+                        value: row.stopDate,
+                        children: <DateTime>{row.stopDate}</DateTime>
                     }
-                ]}
-            />
-        );
+                ]
+            };
+        });
+
+        return <Table rows={rows} />;
     }
 });
